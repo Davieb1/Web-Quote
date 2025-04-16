@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Quote Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jsPDF and autoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            background-color: black;
+            font-family: 'Arial', sans-serif;
+        }
+
+        header {
+            background: black;
+            color: white;
+            border-bottom: 1px solid limegreen;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .form-section {
+            background: black;
+            padding: 2rem;
+            border: 1px solid limegreen;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        #quote-summary {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem 0;
+            background-color: #e9ecef;
+            margin-top: 2rem;
+        }
+
+        #complexity-section {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 class="display-4">Website Quote Generator</h1>
+        <p class="lead">Generate a professional quote for your website project in seconds.</p>
+    </header>
+    <main class="container">
+        <section class="form-section">
+            <form id="quote-form">
+                <h3 class="mb-4">Your Project Details</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="business-name" class="form-label">Business Name <span
+                                class="text-muted">(Required)</span></label>
+                        <input type="text" class="form-control" id="business-name" placeholder="e.g., Acme Corp"
+                            required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="client-email" class="form-label">Client Email <span
+                                class="text-muted">(Required)</span></label>
+                        <input type="email" class="form-control" id="client-email" placeholder="e.g., client@acme.com"
+                            required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="website-type" class="form-label">Type of Website <span class="text-muted">(Select
+                            one)</span></label>
+                    <select class="form-select" id="website-type" required>
+                        <option value="" disabled selected>Choose a website type</option>
+                        <option value="simple">Simple Informational (£520, up to 3 pages)</option>
+                        <option value="ecommerce">E-commerce (£1,300, up to 5 pages)</option>
+                        <option value="portfolio">Portfolio (£780, up to 5 pages)</option>
+                        <option value="custom">Custom Build (£325, 1 page included)</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="complexity-section">
+                    <label for="complexity" class="form-label">Complexity Level <span class="text-muted">(For Custom Builds)</span></label>
+                    <select class="form-select" id="complexity">
+                        <option value="low">Low (£325 base)</option>
+                        <option value="medium">Medium (£487.50 base)</option>
+                        <option value="high">High (£650 base)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="pages" class="form-label">Total Pages <span class="text-muted">(£150 per additional
+                            page)</span></label>
+                    <input type="number" class="form-control" id="pages" min="1" value="1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="timeline" class="form-label">Desired Timeline <span class="text-muted">(Select one)</span></label>
+                    <select class="form-select" id="timeline" required>
+                        <option value="" disabled selected>Choose a timeline</option>
+                        <option value="under2weeks">Under 2 weeks (+20% surcharge)</option>
+                        <option value="2to3weeks">2–3 weeks (+10% surcharge)</option>
+                        <option value="over3weeks">Over 3 weeks (no surcharge)</option>
+                    </select>
+                </div>
+                <h5 class="mt-4">Add-Ons</h5>
+                <div class="form-check mb-2">
+                    <input type="checkbox" class="form-check-input" id="hosting">
+                    <label class="form-check-label" for="hosting">Hosting (£100/year)</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input type="checkbox" class="form-check-input" id="domain">
+                    <label class="form-check-label" for="domain">Domain Registration (£20/year)</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input type="checkbox" class="form-check-input" id="seo">
+                    <label class="form-check-label" for="seo">Basic SEO Optimisation (£150)</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="maintenance">
+                    <label class="form-check-label" for="maintenance">Monthly Maintenance (£50/month)</label>
+                </div>
+                <div class="mb-3">
+                    <label for="discount" class="form-label">Discount <span class="text-muted">(Optional)</span></label>
+                    <select class="form-select" id="discount">
+                        <option value="none">No Discount</option>
+                        <option value="5%">5% Off</option>
+                        <option value="10%">10% Off</option>
+                        <option value="15%">15% Off</option>
+                        <option value="20%">20% Off</option>
+                        <option value="25%">25% Off</option>
+                        <option value="30%">30% Off</option>
+                        <option value="35%">35% Off</option>
+                        <option value="40%">40% Off</option>
+                        <option value="45%">45% Off</option>
+                        <option value="£50">£50 Off</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Additional Notes <span
+                            class="text-muted">(Optional)</span></label>
+                    <textarea class="form-control" id="notes" rows="3"
+                        placeholder="e.g., Need a custom contact form"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Generate Quote</button>
+            </form>
+        </section>
+
+        <div id="quote-summary">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Your Quote Summary</h2>
+                </div>
+                <div class="card-body" id="summary-content"></div>
+                <div class="card-footer text-end">
+                    <button class="btn btn-primary me-2" onclick="window.print()">Print</button>
+                    <button class="btn btn-secondary me-2" id="email-quote">Email Quote</button>
+                    <button class="btn btn-success me-2" id="download-pdf">Download PDF</button>
+                    <button class="btn btn-outline-info"
+                        onclick="document.getElementById('quote-form').parentElement.style.display='block';document.getElementById('quote-summary').style.display='none';">Edit
+                        Quote</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2025 daviesoftwaredev. Contact us at <a href="mailto:daviebirrell28@gmail.com">daviebirrell28@gmail.com</a>.
+        </p>
+    </footer>
+
+    <script>
+        let quoteData = {};
+
+        // Show/hide complexity section based on website type
+        document.getElementById('website-type').addEventListener('change', function () {
+            const complexitySection = document.getElementById('complexity-section');
+            complexitySection.style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+
+        document.getElementById('quote-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Get form values
+            quoteData.businessName = document.getElementById('business-name').value;
+            quoteData.clientEmail = document.getElementById('client-email').value;
+            quoteData.websiteType = document.getElementById('website-type').value;
+            quoteData.complexity = document.getElementById('complexity').value;
+            quoteData.pages = parseInt(document.getElementById('pages').value);
+            quoteData.timeline = document.getElementById('timeline').value;
+            quoteData.hosting = document.getElementById('hosting').checked;
+            quoteData.domain = document.getElementById('domain').checked;
+            quoteData.seo = document.getElementById('seo').checked;
+            quoteData.maintenance = document.getElementById('maintenance').checked;
+            quoteData.discount = document.getElementById('discount').value;
+            quoteData.notes = document.getElementById('notes').value || 'None provided';
+
+            // Define pricing and timelines
+            const pricing = {
+                simple: { base: 520, includedPages: 3, time: '1 week' },
+                ecommerce: { base: 1300, includedPages: 5, time: '2-3 weeks' },
+                portfolio: { base: 780, includedPages: 5, time: '1-2 weeks' },
+                custom: { base: 325, includedPages: 1, time: '1-2 weeks' } // Base for low complexity
+            };
+            const complexityMultipliers = {
+                low: 1,
+                medium: 1.5,
+                high: 2
+            };
+            const timelineSurcharges = {
+                under2weeks: 0.20, // 20% surcharge
+                '2to3weeks': 0.10, // 10% surcharge
+                over3weeks: 0 // No surcharge
+            };
+            const timelineDisplay = {
+                under2weeks: 'Under 2 weeks',
+                '2to3weeks': '2–3 weeks',
+                over3weeks: 'Over 3 weeks'
+            };
+            const pageCost = 150; // Updated to £150
+            const hostingCost = 100;
+            const domainCost = 20;
+            const seoCost = 150;
+            const maintenanceCost = 50;
+
+            // Calculate costs
+            let { base, includedPages } = pricing[quoteData.websiteType];
+            let time = timelineDisplay[quoteData.timeline]; // Use selected timeline for display
+            
+            // Adjust base price for Custom Build based on complexity
+            if (quoteData.websiteType === 'custom') {
+                const multiplier = complexityMultipliers[quoteData.complexity];
+                base = base * multiplier;
+                // Override timeline for Custom Build based on complexity if not specified by user
+                if (!quoteData.timeline) {
+                    time = quoteData.complexity === 'high' ? '2-3 weeks' : quoteData.complexity === 'medium' ? '1-2 weeks' : '1 week';
+                }
+            }
+
+            const additionalPages = Math.max(0, quoteData.pages - includedPages);
+            let subtotal = base + (additionalPages * pageCost);
+            subtotal += quoteData.hosting ? hostingCost : 0;
+            subtotal += quoteData.domain ? domainCost : 0;
+            subtotal += quoteData.seo ? seoCost : 0;
+            subtotal += quoteData.maintenance ? maintenanceCost : 0;
+
+            // Apply short-notice surcharge
+            let surchargeAmount = 0;
+            const surchargeRate = timelineSurcharges[quoteData.timeline];
+            if (surchargeRate > 0) {
+                surchargeAmount = subtotal * surchargeRate;
+                subtotal += surchargeAmount;
+            }
+
+            // Apply discount
+            let discountAmount = 0;
+            if (quoteData.discount.endsWith('%')) {
+                const percentage = parseFloat(quoteData.discount) / 100;
+                discountAmount = subtotal * percentage;
+                subtotal -= discountAmount;
+            } else if (quoteData.discount === '£50') {
+                discountAmount = 50;
+                subtotal -= 50;
+            }
+
+            const totalCost = subtotal; // No VAT added
+
+            // Store calculated values in quoteData
+            quoteData.base = base;
+            quoteData.includedPages = includedPages;
+            quoteData.time = time;
+            quoteData.additionalPages = additionalPages;
+            quoteData.pageCost = pageCost;
+            quoteData.hostingCost = hostingCost;
+            quoteData.domainCost = domainCost;
+            quoteData.seoCost = seoCost;
+            quoteData.maintenanceCost = maintenanceCost;
+            quoteData.surchargeAmount = surchargeAmount;
+            quoteData.surchargeRate = surchargeRate;
+            quoteData.subtotal = subtotal;
+            quoteData.totalCost = totalCost;
+            quoteData.discountAmount = discountAmount;
+
+            // Generate quote summary
+            const summary = `
+                <p><strong>Client:</strong> ${quoteData.businessName} (${quoteData.clientEmail})</p>
+                <p><strong>Website Type:</strong> ${quoteData.websiteType.charAt(0).toUpperCase() + quoteData.websiteType.slice(1)}${quoteData.websiteType === 'custom' ? ' (' + quoteData.complexity.charAt(0).toUpperCase() + quoteData.complexity.slice(1) + ' Complexity)' : ''} (£${base})</p>
+                <p><strong>Total Pages:</strong> ${quoteData.pages} ${additionalPages > 0 ? `(Additional: ${additionalPages} x £${pageCost} = £${additionalPages * pageCost})` : ''}</p>
+                <p><strong>Desired Timeline:</strong> ${time} ${surchargeAmount > 0 ? `(Short-Notice Surcharge: ${surchargeRate * 100}% = £${surchargeAmount.toFixed(2)})` : ''}</p>
+                <p><strong>Add-Ons:</strong></p>
+                <ul>
+                    <li>Hosting: ${quoteData.hosting ? `Yes (£${hostingCost}/year)` : 'No'}</li>
+                    <li>Domain: ${quoteData.domain ? `Yes (£${domainCost}/year)` : 'No'}</li>
+                    <li>SEO Optimization: ${quoteData.seo ? `Yes (£${seoCost})` : 'No'}</li>
+                    <li>Maintenance: ${quoteData.maintenance ? `Yes (£${maintenanceCost}/month)` : 'No'}</li>
+                </ul>
+                <p><strong>Discount:</strong> ${quoteData.discount === 'none' ? 'None' : `${quoteData.discount} (£${discountAmount.toFixed(2)})`}</p>
+                <p><strong>Total Cost:</strong> £${totalCost.toFixed(2)}</p>
+                <p><strong>Estimated Delivery:</strong> ${time} <em>(subject to complexity & revisions)</em></p>
+                <p><strong>Notes:</strong> ${quoteData.notes}</p>
+            `;
+            document.getElementById('summary-content').innerHTML = summary;
+
+            // Email quote setup
+            const emailBody = encodeURIComponent(`
+Quote for ${quoteData.businessName}
+
+Client Email: ${quoteData.clientEmail}
+Website Type: ${quoteData.websiteType.charAt(0).toUpperCase() + quoteData.websiteType.slice(1)}${quoteData.websiteType === 'custom' ? ' (' + quoteData.complexity.charAt(0).toUpperCase() + quoteData.complexity.slice(1) + ' Complexity)' : ''}
+Total Pages: ${quoteData.pages}
+Desired Timeline: ${time}${surchargeAmount > 0 ? ` (Short-Notice Surcharge: ${surchargeRate * 100}% = £${surchargeAmount.toFixed(2)})` : ''}
+Add-Ons:
+- Hosting: ${quoteData.hosting ? 'Yes' : 'No'}
+- Domain: ${quoteData.domain ? 'Yes' : 'No'}
+- SEO: ${quoteData.seo ? 'Yes' : 'No'}
+- Maintenance: ${quoteData.maintenance ? 'Yes' : 'No'}
+Discount: ${quoteData.discount === 'none' ? 'None' : quoteData.discount}
+Total Cost: £${totalCost.toFixed(2)}
+Estimated Delivery: ${time}
+Notes: ${quoteData.notes}
+            `);
+            document.getElementById('email-quote').onclick = function () {
+                window.location.href = `mailto:daviebirrell28@gmail.com?subject=Quote Request from ${quoteData.businessName}&body=${emailBody}`;
+            };
+
+            // Download PDF setup
+            document.getElementById('download-pdf').onclick = function () {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+
+                // Attempt to add logo, but proceed regardless
+                const logo = new Image();
+                logo.src = 'img/DavieSoftwareDev-Logo.png'; // Ensure this path is correct relative to your HTML file
+                logo.onload = function () {
+                    pdf.addImage(logo, 'PNG', 10, 10, 20, 20);
+                    generatePDFContent();
+                };
+                logo.onerror = function () {
+                    generatePDFContent(); // Proceed without logo if it fails
+                };
+
+                // Define PDF content generation
+                function generatePDFContent() {
+                    // Add business details
+                    pdf.setFontSize(12);
+                    pdf.text('DavieSoftwareDev', 35, 15);
+                    pdf.text('Leven, Fife, Scotland, UK', 35, 20);
+                    pdf.text('Phone: 01234 567 890', 35, 25);
+                    pdf.text('Email: daviebirrell28@gmail.com', 35, 30);
+
+                    // Add quote information
+                    pdf.setFontSize(14);
+                    pdf.text('Invoice Quote', 10, 40);
+                    pdf.setFontSize(10);
+                    pdf.text(`Date: ${new Date().toLocaleDateString()}`, 10, 50);
+                    pdf.text(`To: ${quoteData.businessName}`, 10, 55);
+                    pdf.text(`Email: ${quoteData.clientEmail}`, 10, 60);
+
+                    // Prepare table data
+                    const tableData = [
+                        ['Description', 'Qty', 'Unit Price', 'Total'],
+                        [`${quoteData.websiteType.charAt(0).toUpperCase() + quoteData.websiteType.slice(1)} Website${quoteData.websiteType === 'custom' ? ' (' + quoteData.complexity.charAt(0).toUpperCase() + quoteData.complexity.slice(1) + ')' : ''}`, '1', `£${quoteData.base.toFixed(2)}`, `£${quoteData.base.toFixed(2)}`],
+                    ];
+                    if (quoteData.additionalPages > 0) {
+                        tableData.push(['Additional Pages', quoteData.additionalPages.toString(), `£${quoteData.pageCost.toFixed(2)}`, `£${(quoteData.additionalPages * quoteData.pageCost).toFixed(2)}`]);
+                    }
+                    if (quoteData.surchargeAmount > 0) {
+                        tableData.push([`Short-Notice Surcharge (${quoteData.surchargeRate * 100}%)`, '1', `£${quoteData.surchargeAmount.toFixed(2)}`, `£${quoteData.surchargeAmount.toFixed(2)}`]);
+                    }
+                    if (quoteData.hosting) {
+                        tableData.push(['Hosting (1 Year)', '1', `£${quoteData.hostingCost.toFixed(2)}`, `£${quoteData.hostingCost.toFixed(2)}`]);
+                    }
+                    if (quoteData.domain) {
+                        tableData.push(['Domain (1 Year)', '1', `£${quoteData.domainCost.toFixed(2)}`, `£${quoteData.domainCost.toFixed(2)}`]);
+                    }
+                    if (quoteData.seo) {
+                        tableData.push(['Basic SEO Optimization', '1', `£${quoteData.seoCost.toFixed(2)}`, `£${quoteData.seoCost.toFixed(2)}`]);
+                    }
+                    if (quoteData.maintenance) {
+                        tableData.push(['Monthly Maintenance (1 Month)', '1', `£${quoteData.maintenanceCost.toFixed(2)}`, `£${quoteData.maintenanceCost.toFixed(2)}`]);
+                    }
+                    if (quoteData.discount !== 'none') {
+                        tableData.push([`Discount (${quoteData.discount})`, '1', `-£${quoteData.discountAmount.toFixed(2)}`, `-£${quoteData.discountAmount.toFixed(2)}`]);
+                    }
+                    tableData.push(['Total', '', '', `£${quoteData.totalCost.toFixed(2)}`]);
+
+                    // Add table to PDF
+                    pdf.autoTable({
+                        startY: 70,
+                        head: [tableData[0]],
+                        body: tableData.slice(1),
+                        theme: 'grid',
+                        styles: { fontSize: 10 },
+                        headStyles: { fillColor: [0, 123, 255] },
+                    });
+
+                    // Add additional information
+                    const finalY = pdf.lastAutoTable.finalY || 70;
+                    pdf.text(`Estimated Delivery: ${quoteData.time} (subject to complexity & revisions)`, 10, finalY + 10);
+                    pdf.text(`Notes: ${quoteData.notes}`, 10, finalY + 15);
+
+                    // Add footer with terms
+                    pdf.setFontSize(8);
+                    pdf.text('Terms: Payment: 50% deposit, 50% on completion. Valid for 30 days from date of quote.', 10, finalY + 25);
+
+                    // Save the PDF
+                    pdf.save(`invoice_quote_${quoteData.businessName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+                }
+            };
+
+            // Show summary, hide form
+            document.getElementById('quote-summary').style.display = 'block';
+            document.getElementById('quote-form').parentElement.style.display = 'none';
+        });
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
